@@ -564,8 +564,8 @@ where
     ) -> Result<(), Error<I::Error>> {
         self.verify_chip_id().await?;
         self.soft_reset(delay).await?;
-        self.calibrate().await?;
-        self.configure(delay, config).await
+        self.configure(delay, config).await?;
+        self.calibrate().await
     }
 
     async fn verify_chip_id(&mut self) -> Result<(), Error<I::Error>> {
@@ -643,7 +643,11 @@ where
         );
         self.interface
             .write_register(BME280_CONFIG_ADDR, data)
-            .await
+            .await?;
+
+        delay.delay_ms(2);
+
+        Ok(())
     }
 
     async fn mode(&mut self) -> Result<SensorMode, Error<I::Error>> {
